@@ -7,6 +7,8 @@ from urllib.parse import urlparse, urlsplit
 from urllib.request import urlopen
 import json
 
+from datetime import datetime
+
 parser = argparse.ArgumentParser(
     description='AWS Documentation Downloader')
 parser.add_argument('-d', '--documentation',
@@ -31,10 +33,20 @@ output_dir = args.base_output_dir
 page_size = args.page_size
 test_mode = args.test_mode
 
+def dateconverter(o):
+    if isinstance(o, datetime):
+        return o.__str__()
+
+
+def pretty_info(data, message_prefix=''):
+    debug_str = json.dumps(data, indent=4, default=dateconverter)
+    print(f'{message_prefix} {debug_str}')
+
+
 def list_pdfs(source_url, download_url_key):
     responseAsJson = json.loads(urlopen(source_url).read().decode('UTF-8'))
     maxNumberofDocuments = responseAsJson['metadata']['totalHits']
-    print("Number of Whitepapers to be retrieved: " + str(maxNumberofDocuments))
+    print("Number of pdfs to be retrieved: " + str(maxNumberofDocuments))
     maxPage = maxNumberofDocuments // page_size + 1
     print("Number of iterations :" + str(maxPage))
     pdfs = set()
@@ -44,12 +56,15 @@ def list_pdfs(source_url, download_url_key):
         responseAsJson = json.loads(
             urlopen(f"{source_url}&page={currentPage}").read().decode('UTF-8'))
         for item in responseAsJson['items']:
-            print("URL to be added to pdf list: " + item['item']['additionalFields'][
-                download_url_key])
-            pdfs.add(item['item']['additionalFields'][download_url_key])
-            if test_mode and len(pdfs) >= 5:
-                print('test_mode is on, stopping here...')
-                return pdfs
+            # pretty_info(item['item'])
+            if download_url_key in item['item']['additionalFields']:
+                print("URL to be added to pdf list: " + item['item']['additionalFields'][download_url_key])
+                pdfs.add(item['item']['additionalFields'][download_url_key])
+                if test_mode and len(pdfs) >= 5:
+                    print('test_mode is on, stopping here...')
+                    return pdfs
+            else:
+                print(f'{download_url_key} does not contain field {download_url_key}')
         currentPage += 1
     return pdfs
 
