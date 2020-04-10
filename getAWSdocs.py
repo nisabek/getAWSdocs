@@ -21,7 +21,7 @@ parser.add_argument('-f', '--force', help='Overwrite old files',
                     action='store_true', required=False)
 parser.add_argument('-o', '--base-output-dir',
                     help="Base for output directory. Each document type is saved into it's own subdirectory(whitepaper for whitepaper, etc). Defaults to current directory",
-                    required=False, default="")
+                    required=False, default="output")
 parser.add_argument('-p', '--page-size', help="pagination size for files", required=False,
                     default=15)
 parser.add_argument('-t', '--test-mode', help="when set, limits the documents to 5 for testing",
