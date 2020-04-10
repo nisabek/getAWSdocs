@@ -57,14 +57,15 @@ def list_pdfs(source_url, download_url_key):
             urlopen(f"{source_url}&page={currentPage}").read().decode('UTF-8'))
         for item in responseAsJson['items']:
             # pretty_info(item['item'])
-            if download_url_key in item['item']['additionalFields']:
-                print("URL to be added to pdf list: " + item['item']['additionalFields'][download_url_key])
-                pdfs.add(item['item']['additionalFields'][download_url_key])
+            item_additional_fields = item['item']['additionalFields']
+            if download_url_key in item_additional_fields:
+                print("URL to be added to pdf list: " + item_additional_fields[download_url_key])
+                pdfs.add(item_additional_fields[download_url_key])
                 if test_mode and len(pdfs) >= 5:
                     print('test_mode is on, stopping here...')
                     return pdfs
             else:
-                print(f'{download_url_key} does not contain field {download_url_key}')
+                print(f'{item_additional_fields} does not contain field {download_url_key}')
         currentPage += 1
     return pdfs
 
