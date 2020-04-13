@@ -54,7 +54,7 @@ Files that exist on disk will not be re-downloaded (so by default only new secti
 ./getAWSdocs.py -d -f
 ```
 
-__Note:__ You can use a combination of -d and -w and -b to download all documents at once.
+__Note:__ You can use a combination of -d and -w and -b and -s to download all documents at once.
 
 That's it!
 
@@ -68,7 +68,7 @@ Built by Ric: [@ric__harvey](https://twitter.com/ric__harvey)
 Passing `-o` or `--base-output-dir` will configure the output directory (each "type" of document is stored in it's own subdirectory under this directory)
 
 ```
-./getAWSdocs.py -d -w -b --base-output-dir output
+./getAWSdocs.py -d -w -b -s --base-output-dir output
 ```
 
 will create `output` directory, download documents to `output/documents`, whitepapers to `output/whitepapers`, etc.
