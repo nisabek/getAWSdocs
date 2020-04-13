@@ -78,3 +78,12 @@ will create `output` directory, download documents to `output/documents`, whitep
 Can't really call it "test" but it's better than nothing:
 
 passing `-t` makes it download only 5 pdfs (for any type of document), which helps during development.
+
+## Why Download?
+
+You might ask yourself, why would somebody be interested in downloading these pdfs. Here are some example usages:
+
+* No internet access (yes, that still happens)
+* Sending PDFs to Kindle for nicer read
+* Feeding the output to a desktop search tool like [Recoll](https://www.lesbonscomptes.com/recoll/) for faster, more focused searching
+* <your-usecase-here>...
