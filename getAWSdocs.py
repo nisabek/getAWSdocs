@@ -17,6 +17,8 @@ parser.add_argument('-w', '--whitepapers', help='Download White Papers',
                     action='store_true', required=False)
 parser.add_argument('-b', '--builderlibrary', help='Download Documents in Builder Library',
                     action='store_true', required=False)
+parser.add_argument('-s', '--solutions', help='Download Documents in Solutions Library',
+                    action='store_true', required=False)
 parser.add_argument('-f', '--force', help='Overwrite old files',
                     action='store_true', required=False)
 parser.add_argument('-o', '--base-output-dir',
@@ -29,7 +31,7 @@ parser.add_argument('-t', '--test-mode', help="when set, limits the documents to
 args = parser.parse_args()
 
 force = args.force
-output_dir = args.base_output_dir
+base_output_dir = args.base_output_dir
 page_size = args.page_size
 test_mode = args.test_mode
 
@@ -58,14 +60,14 @@ def list_pdfs(source_url, download_url_key):
         for item in responseAsJson['items']:
             # pretty_info(item['item'])
             item_additional_fields = item['item']['additionalFields']
-            if download_url_key in item_additional_fields:
+            if download_url_key in item_additional_fields and "pdf" in item_additional_fields[download_url_key]:
                 print("URL to be added to pdf list: " + item_additional_fields[download_url_key])
                 pdfs.add(item_additional_fields[download_url_key])
                 if test_mode and len(pdfs) >= 5:
                     print('test_mode is on, stopping here...')
                     return pdfs
             else:
-                print(f'{item_additional_fields} does not contain field {download_url_key}')
+                print(f'does not contain field {download_url_key}')
         currentPage += 1
     return pdfs
 
@@ -73,6 +75,10 @@ def list_pdfs(source_url, download_url_key):
 def list_builderlibrary_pdfs():
     builder_library_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=amazon-redwood&sort_by=item.additionalFields.customSort&sort_order=asc&size={page_size}&item.locale=en_US"
     return list_pdfs(builder_library_url, 'downloadUrl')
+
+def list_solutions_pdfs():
+    solutions_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=solutions-master&sort_by=item.additionalFields.sortDate&sort_order=asc&size={page_size}&item.locale=en_US"
+    return list_pdfs(solutions_url, 'downloadUrl')
 
 def list_whitepaper_pdfs():
     whitepaper_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=whitepapers&sort_by=item.additionalFields.sortDate&sort_order=desc&size={page_size}&item.locale=en_US&tags.id=whitepapers%23content-type%23whitepaper"
@@ -170,24 +176,14 @@ def save_pdf(full_dir, filename, pdf_url, force):
 
 def get_pdfs(pdf_list, force, output_dir):
     for pdf_url in pdf_list:
-        doc = pdf_url.split('/')
-        doc_location = doc[3]
         filename = urlsplit(pdf_url).path.split('/')[-1]
-        # Set download dir for whitepapers
-        if "whitepapers" in doc_location:
-            full_dir = "whitepapers/"
-        else:
-            if "builderslibrary" in doc_location:
-                full_dir = "builderslibrary/"
-            else:
-                # Set download dir and sub directories for documentation
-                full_dir = "documentation/"
-                directory = urlsplit(pdf_url).path.split('/')[:-1]
-                for path in directory:
-                    if path != "":
-                        full_dir = full_dir + path + "/"
+        full_dir = f'{output_dir}/'
+        directory = urlsplit(pdf_url).path.split('/')[:-1]
+        for path in directory:
+            if path != "":
+                full_dir = full_dir + path + "/"
         try:
-            save_pdf(f'{output_dir}/{full_dir}', filename, pdf_url, force)
+            save_pdf(f'{base_output_dir}/{full_dir}', filename, pdf_url, force)
         except:
             continue
 
@@ -197,15 +193,19 @@ def main1():
         print("Downloading Docs")
         pdf_list = list_docs_pdfs(
             "https://docs.aws.amazon.com/en_us/main-landing-page.xml")
-        get_pdfs(pdf_list, force, output_dir)
+        get_pdfs(pdf_list, force, "documentation")
     if args.whitepapers:
         print("Downloading Whitepapers")
         pdf_list = list_whitepaper_pdfs()
-        get_pdfs(pdf_list, force, output_dir)
+        get_pdfs(pdf_list, force, "whitepapers")
     if args.builderlibrary:
-        print("Downloading Builder Lib document")
+        print("Downloading Builder Lib documents")
         pdf_list = list_builderlibrary_pdfs()
-        get_pdfs(pdf_list, force, output_dir)
+        get_pdfs(pdf_list, force, "builderslibrary")
+    if args.solutions:
+        print("Downloading solutions")
+        pdf_list = list_solutions_pdfs()
+        get_pdfs(pdf_list, force, "solutions")
     for p in pdf_list:
         print(p)
 
