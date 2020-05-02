@@ -19,6 +19,8 @@ parser.add_argument('-b', '--builderlibrary', help='Download Documents in Builde
                     action='store_true', required=False)
 parser.add_argument('-s', '--solutions', help='Download Documents in Solutions Library',
                     action='store_true', required=False)
+parser.add_argument('-e', '--events', help='Download Documents in Events Library',
+                    action='store_true', required=False)
 parser.add_argument('-f', '--force', help='Overwrite old files',
                     action='store_true', required=False)
 parser.add_argument('-o', '--base-output-dir',
@@ -81,9 +83,14 @@ def list_solutions_pdfs():
     return list_pdfs(solutions_url, 'downloadUrl')
 
 def list_whitepaper_pdfs():
-    whitepaper_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=whitepapers&sort_by=item.additionalFields.sortDate&sort_order=desc&size={page_size}&item.locale=en_US&tags.id=whitepapers%23content-type%23whitepaper"
+    whitepaper_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=whitepapers&sort_by=item.additionalFields.sortDate&sort_order=desc&size={page_size}&item.locale=en_US"
 
     return list_pdfs(whitepaper_url, 'primaryURL')
+
+def list_events_pdfs():
+    events_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=event-content&sort_by=item.dateCreated&sort_order=desc&size={page_size}&item.locale=en_US"
+
+    return list_pdfs(events_url, 'headlineUrl')
 
 
 def find_pdfs_in_html(url):
@@ -206,6 +213,10 @@ def main1():
         print("Downloading solutions")
         pdf_list = list_solutions_pdfs()
         get_pdfs(pdf_list, force, "solutions")
+    if args.events:
+        print("Downloading events")
+        pdf_list = list_events_pdfs()
+        get_pdfs(pdf_list, force, "events")
     for p in pdf_list:
         print(p)
 

@@ -1,8 +1,10 @@
 # Fork of Fork of https://github.com/richarvey/getAWSdocs :)
 
-This is a fork of https://github.com/emschmitt/getAWSdocs with some code reorganization and extra parameters.
+This is a fork of https://github.com/emschmitt/getAWSdocs with some code reorganization, extra parameters and more sources such as "solutions", "reInvent slides"(searchable PDFs), etc.
 
 While waiting for https://github.com/richarvey/getAWSdocs/pull/11 PR to be merged, I wanted to use the library and went through the code and made it a little bit understandable for myself. Some additional parameters added. 
+
+Original README
 
 ## About
 
@@ -46,6 +48,12 @@ To get all the [builder libraries](https://aws.amazon.com/builders-library/)
 
 ```
 ./getAWSdocs.py -b
+``` 
+
+To get all the "event" slides (mostly re:Invent content)
+
+```
+./getAWSdocs.py -e
 ``` 
 
 Files that exist on disk will not be re-downloaded (so by default only new sections/files are downloaded). To override this default and force re-download of files that exist on disk, use
