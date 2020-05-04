@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-
+import urllib
 from bs4 import BeautifulSoup
 import os
 import argparse
-from urllib.parse import urlparse, urlsplit
-from urllib.request import urlopen
 import json
 
 from datetime import datetime
+
+from urllib.request import urlopen
+
+from urllib.parse import urlsplit
 
 parser = argparse.ArgumentParser(
     description='AWS Documentation Downloader')
@@ -20,6 +22,10 @@ parser.add_argument('-b', '--builderlibrary', help='Download Documents in Builde
 parser.add_argument('-s', '--solutions', help='Download Documents in Solutions Library',
                     action='store_true', required=False)
 parser.add_argument('-e', '--events', help='Download Documents in Events Library',
+                    action='store_true', required=False)
+parser.add_argument('-q', '--quick-starts', help='Download Documents in QuickStarts Library',
+                    action='store_true', required=False)
+parser.add_argument('-a', '--all', help='Activates all file type switches',
                     action='store_true', required=False)
 parser.add_argument('-f', '--force', help='Overwrite old files',
                     action='store_true', required=False)
@@ -62,14 +68,14 @@ def list_pdfs(source_url, download_url_key):
         for item in responseAsJson['items']:
             # pretty_info(item['item'])
             item_additional_fields = item['item']['additionalFields']
-            if download_url_key in item_additional_fields and "pdf" in item_additional_fields[download_url_key]:
+            if download_url_key in item_additional_fields:
                 print("URL to be added to pdf list: " + item_additional_fields[download_url_key])
                 pdfs.add(item_additional_fields[download_url_key])
                 if test_mode and len(pdfs) >= 5:
                     print('test_mode is on, stopping here...')
                     return pdfs
             else:
-                print(f'does not contain field {download_url_key}')
+                print(f'{source_url} does not contain field {download_url_key}')
         currentPage += 1
     return pdfs
 
@@ -91,6 +97,12 @@ def list_events_pdfs():
     events_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=event-content&sort_by=item.dateCreated&sort_order=desc&size={page_size}&item.locale=en_US"
 
     return list_pdfs(events_url, 'headlineUrl')
+
+
+def list_quickstart_pdfs():
+    quickstart_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=quickstart-content&sort_by=item.additionalFields.updateDate&sort_order=desc&size={page_size}&item.locale=en_US"
+
+    return list_pdfs(quickstart_url, 'guideUrl')
 
 
 def find_pdfs_in_html(url):
@@ -183,6 +195,15 @@ def save_pdf(full_dir, filename, pdf_url, force):
 
 def get_pdfs(pdf_list, force, output_dir):
     for pdf_url in pdf_list:
+        if not "pdf" in pdf_url:
+            try:
+                pdf_url = urlopen(pdf_url).geturl()
+            except:
+                print(f"Error trying to get url for {pdf_url}, will continue")
+                continue
+            if not "pdf" in pdf_url:
+                print(f"Skipping {pdf_url} - doesn't seem to be a pdf url")
+                continue
         filename = urlsplit(pdf_url).path.split('/')[-1]
         full_dir = f'{output_dir}/'
         directory = urlsplit(pdf_url).path.split('/')[:-1]
@@ -196,27 +217,31 @@ def get_pdfs(pdf_list, force, output_dir):
 
 def main1():
     pdf_list = []
-    if args.documentation:
+    if args.documentation or args.all:
         print("Downloading Docs")
         pdf_list = list_docs_pdfs(
             "https://docs.aws.amazon.com/en_us/main-landing-page.xml")
         get_pdfs(pdf_list, force, "documentation")
-    if args.whitepapers:
+    if args.whitepapers or args.all:
         print("Downloading Whitepapers")
         pdf_list = list_whitepaper_pdfs()
         get_pdfs(pdf_list, force, "whitepapers")
-    if args.builderlibrary:
+    if args.builderlibrary or args.all:
         print("Downloading Builder Lib documents")
         pdf_list = list_builderlibrary_pdfs()
         get_pdfs(pdf_list, force, "builderslibrary")
-    if args.solutions:
+    if args.solutions or args.all:
         print("Downloading solutions")
         pdf_list = list_solutions_pdfs()
         get_pdfs(pdf_list, force, "solutions")
-    if args.events:
+    if args.events or args.all:
         print("Downloading events")
         pdf_list = list_events_pdfs()
         get_pdfs(pdf_list, force, "events")
+    if args.quick_starts or args.all:
+        print("Downloading Quick Starts")
+        pdf_list = list_quickstart_pdfs()
+        get_pdfs(pdf_list, force, "quickstarts")
     for p in pdf_list:
         print(p)
 

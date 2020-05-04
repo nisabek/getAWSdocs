@@ -1,6 +1,6 @@
 # Fork of Fork of https://github.com/richarvey/getAWSdocs :)
 
-This is a fork of https://github.com/emschmitt/getAWSdocs with some code reorganization, extra parameters and more sources such as "solutions", "reInvent slides"(searchable PDFs), etc.
+This is a fork of https://github.com/emschmitt/getAWSdocs with some code reorganization, extra parameters and more sources such as "solutions", "reInvent slides"(searchable PDFs), quick starts etc.
 
 While waiting for https://github.com/richarvey/getAWSdocs/pull/11 PR to be merged, I wanted to use the library and went through the code and made it a little bit understandable for myself. Some additional parameters added. 
 
@@ -54,6 +54,18 @@ To get all the "event" slides (mostly re:Invent content)
 
 ```
 ./getAWSdocs.py -e
+``` 
+
+To get all the "quick start" solutions
+
+```
+./getAWSdocs.py -q
+``` 
+
+To get all aforementioned types
+
+```
+./getAWSdocs.py -a
 ``` 
 
 Files that exist on disk will not be re-downloaded (so by default only new sections/files are downloaded). To override this default and force re-download of files that exist on disk, use
