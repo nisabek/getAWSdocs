@@ -25,6 +25,8 @@ parser.add_argument('-e', '--events', help='Download Documents in Events Library
                     action='store_true', required=False)
 parser.add_argument('-q', '--quick-starts', help='Download Documents in QuickStarts Library',
                     action='store_true', required=False)
+parser.add_argument('-c', '--compliance', help='Download Compliance resources',
+                    action='store_true', required=False)
 parser.add_argument('-a', '--all', help='Activates all file type switches',
                     action='store_true', required=False)
 parser.add_argument('-f', '--force', help='Overwrite old files',
@@ -87,6 +89,10 @@ def list_builderlibrary_pdfs():
 def list_solutions_pdfs():
     solutions_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=solutions-master&sort_by=item.additionalFields.sortDate&sort_order=asc&size={page_size}&item.locale=en_US"
     return list_pdfs(solutions_url, 'downloadUrl')
+
+def list_compliance_pdfs():
+    compliance_resources = f"https://aws.amazon.com/compliance/resources/"
+    return find_pdfs_in_html(compliance_resources)
 
 def list_whitepaper_pdfs():
     whitepaper_url = f"https://aws.amazon.com/api/dirs/items/search?item.directoryId=whitepapers&sort_by=item.additionalFields.sortDate&sort_order=desc&size={page_size}&item.locale=en_US"
@@ -242,6 +248,10 @@ def main1():
         print("Downloading Quick Starts")
         pdf_list = list_quickstart_pdfs()
         get_pdfs(pdf_list, force, "quickstarts")
+    if args.compliance or args.all:
+        print("Downloading Compliance Resources")
+        pdf_list = list_compliance_pdfs()
+        get_pdfs(pdf_list, force, "compliance")
     for p in pdf_list:
         print(p)
 
